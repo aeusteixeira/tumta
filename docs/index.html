@@ -94,8 +94,8 @@
 </script>
 
 <style>
-  @font-face { font-family: "Young Serif"; src: url("fontes/YoungSerif.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-  @font-face { font-family: "Figtree"; src: url("fontes/Figtree.woff2") format("woff2"); font-weight: 300 900; font-display: swap; }
+  @font-face { font-family: "Young Serif"; src: url("fontes/YoungSerif.woff2") format("woff2"); font-weight: 400; font-display: block; }
+  @font-face { font-family: "Figtree"; src: url("fontes/Figtree.woff2") format("woff2"); font-weight: 300 900; font-display: block; }
   :root {
     --fundo: #17110D; --fundo-2: #120D0A; --cartao: #211812; --linha: #33261C; --linha-2: #2A1F17; --linha-forte: #4A3828;
     --texto: #F4EBDD; --claro: #D8CABA; --medio: #BFAE9C; --suave: #A89684; --apagado: #7D6B5B;
@@ -305,7 +305,8 @@
   @media (max-width: 760px) {
     .topo nav a:not(.cta) { display: none; }
     .hero .caixa { padding-top: 40px; padding-bottom: 64px; }
-    .hero::before { background: linear-gradient(180deg, rgba(23,17,13,.94) 0%, rgba(23,17,13,.86) 55%, rgba(23,17,13,.45) 100%); }
+    .hero > .fundo { top: auto; bottom: 0; height: 600px; }
+    .hero::before { background: linear-gradient(180deg, var(--fundo) 0%, var(--fundo) calc(100% - 600px), rgba(23,17,13,.55) calc(100% - 420px), rgba(23,17,13,.3) 100%); }
     .faq details p { padding-right: 4px; }
     .marcador { display: none; }
   }
@@ -611,7 +612,7 @@
     el.innerHTML = '<img class="foto" src="img/djembe-topo.webp" alt="" width="560" height="560">' +
       '<div class="centro"></div>' +
       '<div class="chip" style="top:62px;background:#F08A2C;color:#17110D">TA · borda</div>' +
-      '<div class="chip" style="top:146px;background:#2E7FC8;color:#fff">TUM · centro</div>' +
+      '<div class="chip" style="top:146px;background:#2670B3;color:#fff">TUM · centro</div>' +
       '<img class="mao" data-mao="E" src="img/mao-esquerda.webp" alt="">' +
       '<img class="mao" data-mao="D" src="img/mao-direita.webp" alt="">' +
       '<div class="onda"></div><div class="onda"></div><div class="som"></div>';
@@ -709,7 +710,7 @@
         nt.textContent = x.som;
         Object.assign(nt.style, { left: (x.mao === "E" ? 56 : 298) + "px", top: (y - 14) + "px", background: COR[x.som],
           color: x.som === "TUM" ? "#08131F" : "#17110D", border: aceso ? "2px solid #fff" : "none",
-          boxShadow: aceso ? `0 0 22px ${COR[x.som]}` : "none", opacity: y < TOPO - 4 ? Math.max(0, 1 + (y - TOPO) / 30) : 1 });
+          boxShadow: aceso ? `0 0 22px ${COR[x.som]}` : "none", opacity: y < TOPO - 10 ? 0 : 1 });
       }
     };
     return { el: q, desenhar };
