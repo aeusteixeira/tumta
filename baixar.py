@@ -12,7 +12,8 @@ def eh_link(texto):
 def achar_deno():
     """Motor de JavaScript que o yt-dlp usa pro YouTube (vai junto no programa instalado)."""
     base = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
-    for caminho in (base / "deno" / "deno.exe", Path(sys.prefix) / "Scripts" / "deno.exe"):
+    for caminho in (base / "deno" / "deno.exe", Path(sys.prefix) / "Scripts" / "deno.exe",
+                    Path(sys.prefix) / "bin" / "deno"):
         if caminho.exists():
             return str(caminho)
     return shutil.which("deno")

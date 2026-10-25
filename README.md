@@ -7,6 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/aeusteixeira/tumta/releases/latest/download/Tumta.zip"><b>⬇ Baixar para Windows</b></a> ·
+  <a href="#linux"><b>Linux</b></a> ·
   <a href="https://aeusteixeira.github.io/tumta/">Site</a> ·
   <a href="LEIAME.md">Documentação</a>
 </p>
@@ -48,6 +49,18 @@ Também precisa do [ffmpeg](https://ffmpeg.org/) no PATH. Pela linha de comando:
 `python partitura.py musica.mp3 --trechos --instrumento atabaque`. Todas as opções estão no [LEIAME](LEIAME.md).
 
 Para montar o `.exe`, use `python empacotar.py` (detalhes no LEIAME).
+
+## Linux
+
+```
+./instalar-linux.sh
+```
+
+Cria o `.venv`, instala as dependências, baixa o modelo do Demucs e põe o Tumtá no menu de
+aplicativos. Precisa de Python 3 e ffmpeg; com placa NVIDIA, a separação do tambor roda na GPU.
+O atalho roda direto da pasta do projeto, então `git pull` já atualiza o programa (rode o
+instalador de novo se mudarem as dependências). Os vídeos ficam em `Documentos/Tumta`.
+`./instalar-linux.sh --remover` tira o atalho do menu.
 
 ## Feito com
 

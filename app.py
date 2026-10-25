@@ -8,6 +8,7 @@ import json
 import multiprocessing
 import os
 import re
+import signal
 import subprocess
 import sys
 import threading
@@ -17,7 +18,9 @@ from pathlib import Path
 
 CONGELADO = getattr(sys, "frozen", False)
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
-PASTA_DADOS = Path(os.environ.get("APPDATA", Path.home())) / "Tumta"
+WINDOWS = os.name == "nt"
+PASTA_DADOS = Path(os.environ.get("APPDATA") if WINDOWS else
+                   os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "Tumta"
 CONFIG = PASTA_DADOS / "config.json"
 SEM_JANELA = 0x08000000 if os.name == "nt" else 0
 TIPOS_ARQUIVO = ("Música ou vídeo (*.mp3;*.wav;*.m4a;*.aac;*.flac;*.ogg;*.opus;*.wma;*.mp4;"
@@ -59,15 +62,38 @@ def salvar_config(cfg):
     CONFIG.write_text(json.dumps(cfg, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def pasta_documentos():
+    if not WINDOWS:
+        # o nome da pasta muda com o idioma do sistema (Documentos, Documents...)
+        try:
+            r = subprocess.run(["xdg-user-dir", "DOCUMENTS"], capture_output=True, text=True)
+            if r.stdout.strip():
+                return Path(r.stdout.strip())
+        except OSError:
+            pass
+    return Path.home() / "Documents"
+
+
 def pasta_padrao():
-    if not CONGELADO:
+    # no Linux o programa instalado roda direto do codigo, entao vale a mesma regra do .exe
+    if not CONGELADO and WINDOWS:
         return str(Path(__file__).parent / "saida")
-    docs = Path.home() / "Documents"
+    docs = pasta_documentos()
     return str((docs if docs.exists() else Path.home()) / "Tumta")
 
 
 def ler_area_transferencia():
-    """Texto copiado (Ctrl+C) no Windows."""
+    """Texto copiado (Ctrl+C)."""
+    if not WINDOWS:
+        for cmd in (["wl-paste", "--no-newline", "--type", "text"],
+                    ["xclip", "-selection", "clipboard", "-o"]):
+            try:
+                r = subprocess.run(cmd, capture_output=True, text=True, timeout=3)
+            except (OSError, subprocess.TimeoutExpired):
+                continue
+            if r.returncode == 0:
+                return r.stdout
+        return ""
     import ctypes
     from ctypes import wintypes
     user32, kernel32 = ctypes.windll.user32, ctypes.windll.kernel32
@@ -161,14 +187,24 @@ class Api:
 
     def abrir(self, caminho):
         if caminho and Path(caminho).exists():
-            os.startfile(caminho)
+            if WINDOWS:
+                os.startfile(caminho)
+            else:
+                subprocess.Popen(["xdg-open", caminho], stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL)
 
     def cancelar(self):
         self._cancelado = True
         if self._proc and self._proc.poll() is None:
             # derruba tambem os processos filhos (desenho em paralelo, ffmpeg)
-            subprocess.run(["taskkill", "/T", "/F", "/PID", str(self._proc.pid)],
-                           capture_output=True, creationflags=SEM_JANELA)
+            if WINDOWS:
+                subprocess.run(["taskkill", "/T", "/F", "/PID", str(self._proc.pid)],
+                               capture_output=True, creationflags=SEM_JANELA)
+            else:
+                try:
+                    os.killpg(self._proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
 
     def gerar(self, op):
         if self._proc and self._proc.poll() is None:
@@ -189,8 +225,10 @@ class Api:
         env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
         self._cancelado = False
         self._atual = op
+        # grupo de processos proprio no Linux, pro cancelar derrubar os filhos junto
         self._proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                      stdin=subprocess.DEVNULL, env=env, creationflags=SEM_JANELA)
+                                      stdin=subprocess.DEVNULL, env=env, creationflags=SEM_JANELA,
+                                      start_new_session=not WINDOWS)
         threading.Thread(target=self._acompanhar, args=(self._proc,), daemon=True).start()
         return True
 
@@ -344,7 +382,14 @@ def abrir_janela():
 
     janela.events.loaded += ao_carregar
     janela.events.closing += lambda: api.cancelar()
-    webview.start()
+    if WINDOWS:
+        webview.start()
+        return
+    # no Wayland o painel acha o icone pelo nome do atalho do menu (tumta.desktop);
+    # sem isso a janela aparece como "python", com o icone generico
+    from qtpy.QtGui import QGuiApplication
+    QGuiApplication.setDesktopFileName("tumta")
+    webview.start(icon=str(BASE / "docs" / "img" / "icone-512.png"))
 
 
 if __name__ == "__main__":
