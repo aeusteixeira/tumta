@@ -55,6 +55,8 @@
 
   /* faixa de grafismo do topo */
   .faixa { flex: none; display: flex; flex-direction: column; background: #1E150F; }
+  /* a de baixo e espelhada: a linha laranja encosta na borda */
+  .faixa.baixo { transform: scaleY(-1); }
   .faixa i { display: block; }
   .faixa .f1 { height: 3px; background: var(--urucum); }
   .faixa .f2 { height: 12px; background: linear-gradient(45deg, #B8622A 50%, transparent 50%) 0 0/12px 12px repeat-x, linear-gradient(-45deg, #B8622A 50%, transparent 50%) 0 0/12px 12px repeat-x; }
@@ -438,6 +440,7 @@
       </div>
     </div>
   </section>
+  <div class="faixa baixo"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="f4"></i></div>
 </div>
 
 <script src="folhas.js"></script>

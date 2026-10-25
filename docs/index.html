@@ -118,6 +118,8 @@
 
   /* faixa de grafismo */
   .faixa { display: flex; flex-direction: column; background: #1E150F; }
+  /* a do rodape e espelhada: a linha laranja encosta na borda */
+  .faixa.baixo { transform: scaleY(-1); margin-top: 40px; }
   .faixa i { display: block; }
   .f1 { height: 3px; background: var(--urucum); }
   .f2 { height: 12px; background: linear-gradient(45deg, #B8622A 50%, transparent 50%) 0 0/12px 12px repeat-x, linear-gradient(-45deg, #B8622A 50%, transparent 50%) 0 0/12px 12px repeat-x; }
@@ -231,7 +233,7 @@
   details[open] summary::after { transform: rotate(45deg); }
   details p { margin: 0 0 18px; color: var(--medio); }
 
-  footer { border-top: 1px solid var(--linha); padding: 36px 0 44px; color: var(--suave); font-size: 15px; }
+  footer { border-top: 1px solid var(--linha); padding: 36px 0 0; color: var(--suave); font-size: 15px; }
   footer .caixa { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
   footer nav { display: flex; gap: 20px; }
 
@@ -503,6 +505,7 @@
       <a href="#baixar">Baixar</a>
     </nav>
   </div>
+  <div class="faixa baixo" aria-hidden="true"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="f4"></i></div>
 </footer>
 
 <script>
