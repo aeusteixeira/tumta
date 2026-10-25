@@ -75,7 +75,8 @@ separação é uma estimativa: se não bater com o que você ouve, ajuste com `-
 | `--vies-tapa 3` | com `--tres-sons`: se estiver marcando TA demais, puxa pra TOM (negativo faz o contrário) |
 | `--deslocar-compasso 2` | se o "1" do compasso estiver no lugar errado, muda 1, 2 ou 3 tempos |
 | `--rapido` | não usa o Demucs (mais rápido, mas erra mais em música com muitos instrumentos) |
-| `--estilo faixas` | volta pro visual antigo, com as notas andando em linhas |
+| `--estilo tambor` | usa o desenho anterior do tambor (o padrão é o layout Tumtá, com fotos do tambor e das mãos; as fotos ficam em `assets/`) |
+| `--estilo faixas` | visual mais antigo, com as notas andando em linhas |
 | `--sem-fundo` | no estilo faixas, não mostra o vídeo original atrás |
 
 ### Demucs (já instalado)

@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/img/video-djembe.webp" width="760" alt="Djembe visto de cima com as mãos tocando e a linha do tempo dos toques TUM e TA de cada mão">
+  <img src="docs/img/video-tumta.webp" width="760" alt="Djembe visto de cima com as mãos tocando e a linha do tempo dos toques TUM e TA de cada mão">
 </p>
 
 Mande uma música (arquivo ou link do YouTube) e o Tumtá:

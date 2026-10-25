@@ -71,6 +71,8 @@ def main():
            "--workpath", str(BUILD), "--distpath", str(DIST), "--specpath", str(BUILD),
            "--add-data", f"{RAIZ / 'ui'}{sep}ui",
            "--add-data", f"{RAIZ / 'modelo'}{sep}modelo",
+           "--add-data", f"{RAIZ / 'assets'}{sep}assets",
+           "--add-data", f"{RAIZ / 'fontes'}{sep}fontes",
            "--hidden-import", "separacao",
            "--collect-submodules", "demucs",
            "--collect-data", "librosa",

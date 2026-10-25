@@ -30,6 +30,7 @@ import soundfile as sf
 
 import aula
 from baixar import baixar, eh_link
+from cena_tumta import CenaTumta
 from tambor import CenaTambor
 
 SR = 44100
@@ -507,8 +508,20 @@ def fmt_tempo(s):
     return f"{int(s // 60)}:{int(s % 60):02d}"
 
 
+def nova_cena(estilo, *dados, etapas=None, tres_sons=False, instrumento="djembe", levada=None,
+              trechos=None, titulo_tumta=None):
+    """Cena do video no estilo escolhido (tumta = layout novo; tambor = desenho anterior)."""
+    if estilo == "tambor":
+        return CenaTambor(*dados, etapas, tres_sons, instrumento)
+    dados = list(dados)
+    if titulo_tumta:
+        dados[10] = titulo_tumta
+    return CenaTumta(*dados, etapas=etapas, tres_sons=tres_sons, instrumento=instrumento,
+                     levada=levada, trechos=trechos)
+
+
 def gerar_aula(info, titulo, nome, tmp, bpm, audio, slots, desl, tres_sons=False,
-               instrumento="djembe"):
+               instrumento="djembe", estilo="tumta", musica=None, levada=None):
     """Video-aula passo a passo de uma levada. Devolve o texto da levada."""
     tempos, tipos, maos, slots_aula, etapas, som, maos_base = aula.montar_aula(
         info, bpm, audio, slots, desl, SR)
@@ -525,8 +538,9 @@ def gerar_aula(info, titulo, nome, tmp, bpm, audio, slots, desl, tres_sons=False
     sf.write(wav_aula, som, SR)
     total = len(som) / SR
     grade_aula = dict(zip(np.searchsorted(slots_aula, tempos - 1e-6).tolist(), tipos.tolist()))
-    cena = CenaTambor(tempos, tipos, maos, slots_aula, grade_aula, {}, 0, compasso_de, bpm, total,
-                      titulo, 1.0, slots_aula[::4], etapas, tres_sons, instrumento)
+    cena = nova_cena(estilo, tempos, tipos, maos, slots_aula, grade_aula, {}, 0, compasso_de, bpm,
+                     total, titulo, 1.0, slots_aula[::4], etapas=etapas, tres_sons=tres_sons,
+                     instrumento=instrumento, levada=levada, titulo_tumta=musica)
     print("Gerando o video-aula...")
     renderizar(f"{nome}.mp4", wav_aula, total, cena=cena)
     print(f"  {nome}.mp4")
@@ -554,6 +568,17 @@ def salvar_levadas(pasta, levadas, trechos=()):
     (pasta / "levadas.json").write_text(json.dumps(dados, indent=1), encoding="utf-8")
 
 
+def trechos_no_tempo(grade, desl, slots):
+    """[(inicio_s, fim_s, levada)] pra o video completo marcar os trechos e a levada atual."""
+    levadas = aula.achar_levadas(grade, desl, compasso_de)
+    if not levadas:
+        return []
+    def tempo(m):
+        return float(slots[min(len(slots) - 1, max(0, m * 16 - desl))])
+    return [(tempo(t["inicio"]), tempo(t["fim"] + 1), t["levada"] + 1)
+            for t in aula.achar_trechos(levadas, grade, desl, compasso_de)]
+
+
 def gerar_aulas(args, nome, pasta, tmp, grade, desl, bpm, audio, slots, video_principal):
     pasta_aulas = pasta / "aulas"
     pasta_aulas.mkdir(exist_ok=True)
@@ -564,7 +589,7 @@ def gerar_aulas(args, nome, pasta, tmp, grade, desl, bpm, audio, slots, video_pr
             return
         salvar_levadas(pasta, [info])
         gerar_aula(info, f"Aula: {nome}", pasta_aulas / "levada base - aula", tmp, bpm,
-                   audio, slots, desl, args.tres_sons, args.instrumento)
+                   audio, slots, desl, args.tres_sons, args.instrumento, args.estilo, nome)
         return
 
     levadas = aula.achar_levadas(grade, desl, compasso_de)
@@ -589,7 +614,7 @@ def gerar_aulas(args, nome, pasta, tmp, grade, desl, bpm, audio, slots, video_pr
         titulo = f"Levada {k}: {nome}"
         print(f"\n=== Levada {k} de {len(levadas)} ===")
         resumo = gerar_aula(info, titulo, pasta_aulas / f"levada {k} - aula", tmp, bpm, audio,
-                            slots, desl, args.tres_sons, args.instrumento)
+                            slots, desl, args.tres_sons, args.instrumento, args.estilo, nome, k)
         linhas += [resumo, "", "-" * 60, ""]
 
     if video_principal and Path(video_principal).exists():
@@ -638,8 +663,9 @@ def main(argv=None):
     ap.add_argument("--duracao", type=float, default=0, help="processa so estes segundos")
     ap.add_argument("--velocidade", type=float, default=1.0,
                     help="deixa a musica mais lenta pra treinar, ex: 0.75 (0.5 a 2)")
-    ap.add_argument("--estilo", choices=["tambor", "faixas"], default="tambor",
-                    help="tambor = visto de cima com as maos; faixas = notas andando em linhas")
+    ap.add_argument("--estilo", choices=["tumta", "tambor", "faixas"], default="tumta",
+                    help="tumta = layout com fotos das maos (padrao); tambor = desenho anterior; "
+                         "faixas = notas andando em linhas")
     ap.add_argument("--sem-fundo", action="store_true",
                     help="no estilo faixas, nao mostra o video original no fundo")
     ap.add_argument("--aula", action="store_true",
@@ -729,9 +755,10 @@ def main(argv=None):
                 renderizar(video_completo, audio_video, total,
                            gerar_frame=cena_faixas(entrada, args, dados))
             else:
-                cena = CenaTambor(tempos, tipos, maos, slots, grade, grade_maos, desl, compasso_de,
-                                  bpm, total, nome, args.velocidade, pulsos_ext,
-                                  tres_sons=args.tres_sons, instrumento=args.instrumento)
+                cena = nova_cena(args.estilo, tempos, tipos, maos, slots, grade, grade_maos, desl,
+                                 compasso_de, bpm, total, nome, args.velocidade, pulsos_ext,
+                                 tres_sons=args.tres_sons, instrumento=args.instrumento,
+                                 trechos=trechos_no_tempo(grade, desl, slots) if args.trechos else None)
                 renderizar(video_completo, audio_video, total, cena=cena)
 
         if args.aula or args.trechos:
