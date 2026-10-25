@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tumtá · Partitura de atabaque e djembe em vídeo, a partir de qualquer música</title>
-<meta name="description" content="Programa grátis para Windows que escuta uma música (arquivo ou link do YouTube), encontra os toques TUM e TA do atabaque ou djembe e gera vídeo-aulas mostrando onde bater e com qual mão, levada por levada.">
+<meta name="description" content="Programa grátis para Windows e Linux que escuta uma música (arquivo ou link do YouTube), encontra os toques TUM e TA do atabaque ou djembe e gera vídeo-aulas mostrando onde bater e com qual mão, levada por levada.">
 <meta name="keywords" content="partitura de atabaque, partitura de djembe, aprender atabaque, aprender djembe, toque de atabaque, levada de atabaque, TUM e TA, vídeo-aula de percussão, ijexá, programa de percussão grátis">
 <meta name="author" content="Tumtá">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -16,7 +16,7 @@
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Tumtá">
 <meta property="og:title" content="Tumtá · Partitura de atabaque e djembe em vídeo">
-<meta property="og:description" content="Mande uma música e receba os vídeos de treino: onde bater, com qual mão, levada por levada. Grátis para Windows.">
+<meta property="og:description" content="Mande uma música e receba os vídeos de treino: onde bater, com qual mão, levada por levada. Grátis para Windows e Linux.">
 <meta property="og:url" content="https://aeusteixeira.github.io/tumta/">
 <meta property="og:image" content="https://aeusteixeira.github.io/tumta/img/og.png">
 <meta property="og:image:width" content="1200">
@@ -44,7 +44,7 @@
   "description": "Programa que analisa uma música ou vídeo do YouTube, encontra os toques TUM (grave, centro) e TA (tapa, borda) do atabaque ou djembe e gera vídeos de treino mostrando onde bater e com qual mão, com aula passo a passo de cada levada.",
   "applicationCategory": "MultimediaApplication",
   "applicationSubCategory": "Ensino de percussão",
-  "operatingSystem": "Windows 10, Windows 11",
+  "operatingSystem": "Windows 10, Windows 11, Linux",
   "inLanguage": "pt-BR",
   "isAccessibleForFree": true,
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
@@ -88,7 +88,7 @@
     { "@type": "Question", "name": "O que é TUM e TA?",
       "acceptedAnswer": { "@type": "Answer", "text": "TUM é o som grave, com a palma da mão no centro do couro. TA é o som da borda, com os dedos batendo perto do aro. No modo avançado, a borda se divide em TOM (aberto, cheio) e TA (tapa, som estalado)." } },
     { "@type": "Question", "name": "Funciona no Mac ou no celular?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Por enquanto só no Windows 10 e 11. Os vídeos gerados são MP4 comuns e podem ser assistidos em qualquer aparelho." } }
+      "acceptedAnswer": { "@type": "Answer", "text": "Por enquanto funciona no Windows 10 e 11 e no Linux. Os vídeos gerados são MP4 comuns e podem ser assistidos em qualquer aparelho." } }
   ]
 }
 </script>
@@ -335,14 +335,14 @@
     <img class="fundo" src="img/fundo-terreiro.webp" alt="" width="1376" height="768" fetchpriority="high">
     <div class="caixa">
       <div class="hero-texto">
-        <span class="selo">Grátis · Windows 10 e 11 · funciona offline</span>
+        <span class="selo">Grátis · Windows e Linux · funciona offline</span>
         <h1 id="titulo-principal">Partitura de <em>atabaque</em> e <em>djembe</em> em vídeo, a partir de qualquer música</h1>
         <p>Mande uma música ou cole o link do YouTube. O Tumtá escuta o tambor, encontra cada TUM e cada TA e gera vídeo-aulas mostrando onde bater e com qual mão, levada por levada.</p>
         <div class="acoes">
           <a class="botao" href="https://github.com/aeusteixeira/tumta/releases/latest/download/Tumta.zip"><span aria-hidden="true">↓</span>Baixar para Windows</a>
           <a class="botao contorno" href="#como">Ver como funciona</a>
         </div>
-        <div class="miudo">Tumta.zip · 586 MB · sem cadastro, sem propaganda</div>
+        <div class="miudo">Tumta.zip · 586 MB · sem cadastro, sem propaganda · <a href="#baixar">também para Linux</a></div>
       </div>
       <div class="hero-tambor">
         <div class="palco" id="palco-hero" role="img" aria-label="Animação: djembe visto de cima com as duas mãos tocando TUM no centro e TA na borda"></div>
@@ -515,8 +515,10 @@
           <p>Extraia o zip, abra o Tumta.exe e mande a primeira música. Os vídeos ficam em Documentos\Tumta.</p>
           <div class="acoes">
             <a class="botao" href="https://github.com/aeusteixeira/tumta/releases/latest/download/Tumta.zip" style="padding:16px 26px;font-size:17px"><span aria-hidden="true">↓</span>Baixar para Windows · 586 MB</a>
+            <a class="botao contorno" href="https://github.com/aeusteixeira/tumta/releases/latest/download/Tumta-linux.tar.gz"><span aria-hidden="true">↓</span>Baixar para Linux</a>
             <a class="link-github" href="https://github.com/aeusteixeira/tumta/releases">Todas as versões e o código no GitHub</a>
           </div>
+          <p class="miudo">No Linux: extraia e rode <code>./instalar-linux.sh</code>. Ele instala o que falta (uns 3 GB) e põe o Tumtá no menu. Precisa de Python 3 e ffmpeg; com placa NVIDIA, roda bem mais rápido.</p>
           <ul class="requisitos">
             <li>Windows 10 ou 11 · 64 bits</li>
             <li>1,5 GB livres</li>
@@ -548,7 +550,7 @@
       <details><summary>Quanto tempo leva para gerar os vídeos?</summary><p>Uma música de 5 minutos leva de 15 a 25 minutos para gerar tudo (vídeo completo, aulas e trechos), dependendo do computador. Dá para deixar a janela minimizada.</p></details>
       <details><summary>Por que o Windows mostra um aviso ao abrir?</summary><p>O aviso “O Windows protegeu o computador” aparece porque o programa não tem assinatura digital paga. Clique em “Mais informações” e depois em “Executar assim mesmo”.</p></details>
       <details><summary>O que é TUM e TA?</summary><p>TUM é o som grave, com a palma da mão no centro do couro. TA é o som da borda, com os dedos batendo perto do aro. No modo avançado, a borda se divide em TOM (aberto, cheio) e TA (tapa, som estalado).</p></details>
-      <details><summary>Funciona no Mac ou no celular?</summary><p>Por enquanto só no Windows 10 e 11. Os vídeos gerados são MP4 comuns e podem ser assistidos em qualquer aparelho.</p></details>
+      <details><summary>Funciona no Mac ou no celular?</summary><p>Por enquanto funciona no Windows 10 e 11 e no Linux. Os vídeos gerados são MP4 comuns e podem ser assistidos em qualquer aparelho.</p></details>
     </div>
   </section>
 </main>
