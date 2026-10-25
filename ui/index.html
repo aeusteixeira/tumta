@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Tumtá</title>
+<style>
+  @font-face { font-family: "Young Serif"; src: url("fontes/YoungSerif.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "Figtree"; src: url("fontes/Figtree.woff2") format("woff2"); font-weight: 300 900; }
+
+  :root {
+    --fundo: #17110D;
+    --cartao: #211812;
+    --fundo-fundo: #120D0A;
+    --fundo-raso: #1A130E;
+    --chip: #2E2118;
+    --sel: #3A2B1F;
+    --linha: #33261C;
+    --linha-forte: #4A3828;
+    --texto: #F4EBDD;
+    --medio: #BFAE9C;
+    --suave: #A89684;
+    --apagado: #7D6B5B;
+    --urucum: #F08A2C;
+    --urucum-claro: #FF9D45;
+    --anil: #4AA0E6;
+    --couro: #E6CBA0;
+    --verde: #3E8E56;
+    --verde-claro: #7BC98F;
+    --erro: #C2502E;
+    --erro-fundo: #24140E;
+    --erro-icone: #3A1A12;
+    --erro-texto: #F2A08A;
+    --fibra: url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22160%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%22.9%22%20numOctaves%3D%222%22%2F%3E%3CfeColorMatrix%20values%3D%220%200%200%200%20.9%200%200%200%200%20.7%200%200%200%200%20.45%200%200%200%20.07%200%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22160%22%20height%3D%22160%22%20filter%3D%22url%28%23n%29%22%2F%3E%3C%2Fsvg%3E);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--fibra), var(--fundo);
+    color: var(--texto);
+    font-family: "Figtree", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+    user-select: none;
+    overflow: hidden;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  input { font: inherit; }
+  [hidden] { display: none !important; }
+  .serif { font-family: "Young Serif", Georgia, serif; font-weight: 400; }
+  .app { position: relative; isolation: isolate; height: 100%; display: flex; flex-direction: column; }
+
+  /* fundo: ramos de folhas */
+  #folhas { position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .6; overflow: hidden; }
+  body.tela-config #folha-topo { display: none; }
+
+  /* faixa de grafismo do topo */
+  .faixa { flex: none; display: flex; flex-direction: column; background: #1E150F; }
+  .faixa i { display: block; }
+  .faixa .f1 { height: 3px; background: var(--urucum); }
+  .faixa .f2 { height: 12px; background: linear-gradient(45deg, #B8622A 50%, transparent 50%) 0 0/12px 12px repeat-x, linear-gradient(-45deg, #B8622A 50%, transparent 50%) 0 0/12px 12px repeat-x; }
+  .faixa .f3 { height: 8px; opacity: .55; background: linear-gradient(45deg, var(--anil) 25%, transparent 25%, transparent 75%, var(--anil) 75%) 0 0/8px 8px, linear-gradient(45deg, var(--anil) 25%, transparent 25%, transparent 75%, var(--anil) 75%) 4px 4px/8px 8px; }
+  .faixa .f4 { height: 2px; background: var(--urucum); }
+
+  .conteudo { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 22px 28px 0; gap: 18px; }
+
+  /* marca */
+  .marca { display: flex; align-items: center; gap: 16px; flex: none; }
+  .logo { width: 48px; height: 48px; border-radius: 50%; border: 6px solid var(--urucum); position: relative; background: #1F1610; flex: none; }
+  .logo::before, .logo::after { content: ""; position: absolute; width: 10px; height: 10px; border-radius: 50%; }
+  .logo::before { left: 5px; top: 15px; background: var(--anil); }
+  .logo::after { right: 5px; top: 8px; background: var(--urucum); }
+  .marca .nome { display: flex; align-items: baseline; gap: 10px; }
+  .marca .nome b { font-family: "Young Serif", Georgia, serif; font-weight: 400; font-size: 26px; line-height: 1.1; }
+  .marca .nome span { font-size: 14px; color: var(--suave); }
+  .marca p { margin: 2px 0 0; font-size: 14px; color: var(--medio); }
+
+  /* cartao com serrilha em cima e textura de fibra */
+  .cartao {
+    position: relative;
+    background: linear-gradient(45deg, #2E2219 50%, transparent 50%) 0 0/12px 12px repeat-x,
+                linear-gradient(-45deg, #2E2219 50%, transparent 50%) 0 0/12px 12px repeat-x,
+                var(--fibra), var(--cartao);
+    border: 1px solid var(--linha);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .titulo-cartao { display: flex; align-items: center; gap: 10px; }
+  .titulo-cartao > b { font-weight: 700; font-size: 15px; }
+  .passo { width: 22px; height: 22px; border-radius: 50%; background: var(--urucum); color: #17110D; font-size: 12px; font-weight: 700; display: grid; place-items: center; flex: none; }
+  .passo.ok { background: var(--verde); color: var(--texto); }
+
+  .seg { display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--fundo); border: 1px solid var(--linha); }
+  .seg button { padding: 6px 12px; border-radius: 7px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; color: var(--suave); }
+  .seg button.sel { background: var(--sel); color: var(--texto); }
+  .seg.vel button { padding: 7px 13px; }
+
+  .yt { width: 16px; height: 11px; border-radius: 3px; background: #E0402F; display: grid; place-items: center; flex: none; }
+  .yt::after { content: ""; border-left: 4px solid var(--texto); border-top: 2.5px solid transparent; border-bottom: 2.5px solid transparent; }
+  .yt.g { width: 26px; height: 18px; border-radius: 5px; }
+  .yt.g::after { border-left-width: 7px; border-top-width: 4.5px; border-bottom-width: 4.5px; margin-left: 2px; }
+
+  /* recentes */
+  .recentes-btn { padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--medio); display: flex; align-items: center; gap: 6px; margin-left: auto; }
+  .recentes-btn:hover { background: #2A1E16; }
+  .recentes-btn small { font-size: 10px; }
+  .recentes { position: absolute; top: 52px; right: 20px; width: 340px; z-index: 5; background: var(--cartao); border: 1px solid var(--linha-forte); border-radius: 14px; box-shadow: 0 18px 40px rgba(0,0,0,.5); padding: 6px; display: flex; flex-direction: column; }
+  .recentes h4 { margin: 0; font-size: 12px; font-weight: 600; color: var(--suave); letter-spacing: .06em; padding: 8px 10px 6px; }
+  .recentes .vazio { padding: 10px 10px 14px; font-size: 13px; color: var(--apagado); }
+  .rec { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 10px; text-align: left; width: 100%; }
+  .rec:hover { background: var(--chip); }
+  .rec .ic { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; }
+  .rec .ic.yt-ic { background: var(--erro-icone); color: #F2866A; }
+  .rec .ic.arq-ic { background: #3A2516; color: var(--urucum); }
+  .rec .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .rec .tx b { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rec .tx span { font-size: 12px; color: var(--suave); }
+
+  /* area da musica (todos os estados tem 96px) */
+  .area { height: 96px; border-radius: 12px; display: flex; align-items: center; gap: 14px; padding: 0 22px; border: 1.5px dashed var(--linha-forte); }
+  .area .ic { width: 52px; height: 52px; border-radius: 12px; background: var(--chip); display: grid; place-items: center; flex: none; color: var(--urucum); font-size: 24px; }
+  .area .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .area .tx b { font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .area .tx span { font-size: 13px; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .area.clicavel { cursor: pointer; gap: 18px; }
+  .area.clicavel:hover { border-color: var(--urucum); background: #261B14; }
+  .area.clicavel .tx b { font-size: 16px; }
+  .area.firme { border-style: solid; border-color: var(--sel); background: var(--fundo-raso); padding: 0 20px; }
+  .area.ruim { border-style: solid; border-color: var(--erro); background: var(--erro-fundo); padding: 0 20px; }
+  .area.ruim .ic { background: var(--erro-icone); color: #F2866A; font-size: 20px; font-weight: 700; width: 48px; height: 48px; }
+  .area.ruim .tx span { color: var(--erro-texto); white-space: normal; }
+  .area.solte { border-style: solid; border-color: var(--urucum); background: #2A1C12; padding: 0 20px; }
+  .area.solte .ic { background: var(--urucum); color: #17110D; font-weight: 700; font-size: 22px; width: 48px; height: 48px; }
+  .area.firme .ic { width: 48px; height: 48px; }
+  .area.escolhida { border: 1px solid var(--sel); background: var(--fundo-raso); gap: 18px; }
+  .area.escolhida .ic.nota { background: var(--urucum); color: #17110D; font-weight: 700; }
+  .area.escolhida .ic.video { width: 84px; border-radius: 10px; background: var(--fundo-fundo); border: 1px solid var(--sel); }
+  .area.escolhida .tx { gap: 8px; }
+  .area.escolhida .linha1 { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+  .area.escolhida .linha1 b { font-size: 16px; }
+  .area.escolhida .linha1 span { color: var(--verde-claro); flex: none; overflow: visible; }
+  .onda { display: flex; gap: 3px; align-items: center; height: 26px; overflow: hidden; }
+  .onda i { width: 3px; flex: none; border-radius: 2px; }
+
+  .entrada-link { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .entrada-link input { height: 40px; border-radius: 10px; background: var(--fundo-fundo); border: 1px solid var(--sel); padding: 0 14px; font-size: 14px; color: var(--texto); outline: 0; width: 100%; }
+  .entrada-link input::placeholder { color: var(--apagado); }
+  .entrada-link input:focus { border-color: var(--urucum); }
+  .entrada-link small { font-size: 12px; color: var(--suave); }
+  .tecla { padding: 1px 6px; border-radius: 5px; border: 1px solid var(--linha-forte); color: #D8CABA; }
+
+  .botao { padding: 10px 16px; border-radius: 10px; background: var(--urucum); color: #17110D; font-size: 14px; font-weight: 700; flex: none; }
+  .botao:hover { background: var(--urucum-claro); }
+  .botao.contorno { background: transparent; border: 1px solid var(--linha-forte); color: var(--texto); padding: 9px 14px; font-size: 13px; }
+  .botao.contorno:hover { background: #2A1E16; }
+  .botao.leve { background: transparent; color: var(--medio); padding: 9px 14px; font-weight: 600; }
+  .botao.leve:hover { background: var(--chip); }
+  .colar { align-self: flex-start; margin-top: 22px; }
+
+  /* instrumento e opcoes */
+  .grade { display: grid; grid-template-columns: 1fr 1.15fr; gap: 18px; flex: 1; min-height: 0; }
+  .tambores { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; min-height: 0; }
+  .tambor { border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: var(--fundo-raso); border: 1.5px solid var(--linha); }
+  .tambor.sel { background: #2C1F15; border-color: var(--urucum); }
+  .tambor:not(.sel):hover { border-color: var(--linha-forte); }
+  .desenho { width: 128px; height: 128px; position: relative; }
+  .desenho div { position: absolute; border-radius: 50%; }
+  .desenho .peg { left: 59px; top: 56px; width: 10px; height: 16px; border-radius: 3px; background: #4A2E1A; }
+  .desenho .aro-atab { inset: 10px; background: #7A4C2A; box-shadow: inset 0 0 0 3px #5A3820; }
+  .desenho .couro { inset: 22px; background: radial-gradient(circle at 40% 38%, #ECD5AE, #CFA978); }
+  .desenho .corda { inset: 4px; background: repeating-conic-gradient(#E9D5B0 0 7deg, #8C6540 7deg 14deg); }
+  .desenho .aro-dj { inset: 16px; background: #5A3820; }
+  .desenho .couro-dj { inset: 20px; background: radial-gradient(circle at 40% 38%, #ECD5AE, #CFA978); }
+  .desenho .mao { width: 14px; height: 14px; opacity: 0; transition: opacity .2s; }
+  .tambor.sel .mao { opacity: 1; }
+  .tambor .rot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .tambor .rot b { font-weight: 700; font-size: 16px; }
+  .tambor .rot span { font-size: 13px; color: var(--suave); }
+  .legenda { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 12px; color: var(--suave); }
+  .legenda span { display: flex; align-items: center; gap: 6px; }
+  .legenda i { width: 9px; height: 9px; border-radius: 50%; }
+
+  .opcoes { gap: 6px; }
+  .opcoes .titulo-cartao { margin-bottom: 8px; }
+  .opcao { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid var(--linha); cursor: pointer; }
+  .opcao.sem-clique { cursor: default; }
+  .opcao .tx { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .opcao .tx b { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .opcao .tx span { font-size: 13px; color: var(--suave); }
+  .avancado { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid #3F5A45; color: var(--verde-claro); }
+  .chave { width: 42px; height: 24px; border-radius: 12px; background: var(--sel); position: relative; flex: none; transition: background .15s; }
+  .chave::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--texto); transition: left .15s; }
+  .opcao.on .chave { background: var(--urucum); }
+  .opcao.on .chave::after { left: 21px; }
+
+  .rodape { flex: none; padding: 16px 28px; display: flex; align-items: center; gap: 16px; }
+  .destino { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--suave); min-width: 0; }
+  .destino code { font-family: inherit; color: #D8CABA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .link { color: var(--urucum); text-decoration: underline; text-underline-offset: 3px; font-size: 13px; flex: none; }
+  .link:hover { color: #FFAE5E; }
+  .dica { font-size: 13px; color: var(--suave); }
+  .cta { padding: 13px 28px; border-radius: 12px; font-weight: 700; font-size: 15px; background: var(--urucum); color: #17110D; display: flex; align-items: center; gap: 10px; }
+  .cta:hover:not(:disabled) { background: var(--urucum-claro); }
+  .cta:disabled { background: #2A1F17; color: #6E5F52; cursor: not-allowed; }
+  .cta small { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 5px; border: 1px solid currentColor; opacity: .6; }
+
+  /* telas */
+  .tela { display: none; flex: 1; min-height: 0; flex-direction: column; }
+  .tela.ativa { display: flex; }
+
+  /* gerando */
+  .gerando { flex: 1; display: flex; flex-direction: column; align-items: center; padding-bottom: 22px; }
+  .progresso { margin-top: auto; width: 620px; padding: 0; gap: 0; overflow: hidden; border-radius: 18px; }
+  .progresso .topo { padding: 24px 26px 20px; display: flex; flex-direction: column; gap: 18px; }
+  .progresso .cab { display: flex; align-items: center; gap: 16px; }
+  .avatar { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 40% 38%, #ECD5AE, #CFA978); box-shadow: 0 0 0 5px #5A3820; display: grid; place-items: center; flex: none; }
+  .pulos { display: flex; gap: 4px; }
+  .pulos i { width: 7px; height: 7px; border-radius: 50%; background: var(--anil); animation: pulo 1s ease-in-out infinite; }
+  .pulos i:nth-child(2n) { background: var(--urucum); }
+  .pulos i:nth-child(2) { animation-delay: .25s; } .pulos i:nth-child(3) { animation-delay: .5s; } .pulos i:nth-child(4) { animation-delay: .75s; }
+  @keyframes pulo { 0%, 100% { transform: scale(.6); opacity: .45; } 30% { transform: scale(1.15); opacity: 1; } }
+  .progresso .cab .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .progresso .cab .tx b { font-weight: 700; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .progresso .cab .tx span { font-size: 13px; color: var(--suave); }
+  .pct { font-family: "Young Serif", Georgia, serif; font-size: 40px; line-height: 1; flex: none; }
+  .barra { height: 8px; border-radius: 4px; background: var(--fundo); overflow: hidden; }
+  .barra i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--anil), var(--urucum)); transition: width .4s; }
+  .numeros { display: flex; justify-content: space-between; font-size: 13px; color: var(--suave); margin-top: 8px; }
+  .etapas { border-top: 1px solid var(--linha); padding: 8px 0; margin: 0; list-style: none; }
+  .etapas li { display: flex; align-items: center; gap: 14px; padding: 10px 26px; color: var(--apagado); font-size: 15px; }
+  .etapas li .bola { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--linha-forte); flex: none; display: grid; place-items: center; }
+  .etapas li .nome { flex: 1; }
+  .etapas li .det { font-size: 13px; }
+  .etapas li.feita { color: var(--medio); }
+  .etapas li.feita .bola { border: 0; background: var(--verde); color: var(--texto); font-size: 11px; font-weight: 700; }
+  .etapas li.feita .bola::after { content: "✓"; }
+  .etapas li.feita .det { color: var(--apagado); }
+  .etapas li.ativa { background: #2A1E16; color: var(--texto); }
+  .etapas li.ativa .nome { font-weight: 600; }
+  .etapas li.ativa .bola { border: 2.5px solid var(--sel); border-top-color: var(--urucum); width: 17px; height: 17px; margin: 1.5px; animation: gira .8s linear infinite; }
+  .etapas li.ativa .det { color: var(--urucum); font-weight: 600; }
+  @keyframes gira { to { transform: rotate(360deg); } }
+  .aviso { margin-top: 20px; font-size: 13px; color: var(--suave); }
+  .cancelar { margin-top: 16px; margin-bottom: auto; padding: 11px 26px; border-radius: 12px; border: 1px solid var(--linha-forte); font-weight: 600; font-size: 14px; }
+  .cancelar:hover { background: #2A1E16; }
+
+  /* pronto */
+  .pronto { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px 1fr; gap: 18px; padding-bottom: 28px; }
+  .pronto .esq { padding: 24px; }
+  .ok-grande { width: 56px; height: 56px; border-radius: 50%; background: #213826; color: var(--verde-claro); display: grid; place-items: center; font-size: 24px; font-weight: 700; }
+  .pronto h2 { margin: 0; font-family: "Young Serif", Georgia, serif; font-weight: 400; font-size: 32px; }
+  .pronto .esq p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--medio); }
+  .fonte { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: var(--fundo-raso); border: 1px solid var(--linha); }
+  .fonte small { font-size: 12px; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fonte div { display: flex; gap: 8px; font-size: 13px; font-weight: 600; }
+  .fonte div span { padding: 3px 10px; border-radius: 999px; background: var(--chip); }
+  .acoes { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+  .acoes button { padding: 13px; border-radius: 12px; font-weight: 700; font-size: 15px; text-align: center; }
+  .acoes .prim { background: var(--urucum); color: #17110D; }
+  .acoes .prim:hover { background: var(--urucum-claro); }
+  .acoes .sec { border: 1px solid var(--linha-forte); font-weight: 600; }
+  .acoes .sec:hover { background: #2A1E16; }
+  .pronto .dir { padding: 20px 22px; gap: 18px; overflow-y: auto; }
+  .pronto .dir::-webkit-scrollbar { width: 8px; }
+  .pronto .dir::-webkit-scrollbar-thumb { background: var(--sel); border-radius: 8px; }
+  .destaque { display: flex; align-items: center; gap: 18px; padding: 14px; border-radius: 14px; background: #2A1E16; border: 1px solid var(--sel); text-align: left; flex: none; }
+  .destaque:hover { border-color: var(--urucum); }
+  .miniatura { width: 150px; height: 86px; border-radius: 10px; background: var(--fundo-fundo); display: grid; place-items: center; flex: none; position: relative; overflow: hidden; }
+  .miniatura .tam { width: 62px; height: 62px; border-radius: 50%; background: radial-gradient(circle at 40% 38%, #ECD5AE, #CFA978); box-shadow: 0 0 0 5px #5A3820; opacity: .35; }
+  .miniatura .play { position: absolute; width: 40px; height: 40px; border-radius: 50%; background: var(--urucum); color: #17110D; display: grid; place-items: center; font-size: 14px; padding-left: 3px; }
+  .destaque .tx { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .rotulo { font-size: 12px; font-weight: 600; color: var(--suave); letter-spacing: .06em; text-transform: uppercase; }
+  .destaque .tx b { font-weight: 700; font-size: 18px; }
+  .destaque .tx span { font-size: 13px; color: var(--suave); }
+  .grupo { display: flex; flex-direction: column; gap: 8px; flex: none; }
+  .item { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 12px; background: var(--fundo-raso); border: 1px solid var(--linha); text-align: left; width: 100%; }
+  .item:hover { border-color: var(--urucum); }
+  .item .play { width: 30px; height: 30px; border-radius: 8px; background: #3A2516; color: var(--urucum); display: grid; place-items: center; font-size: 11px; flex: none; }
+  .item .nome { flex: 1; font-weight: 600; font-size: 15px; }
+  .item .det { font-size: 13px; color: var(--suave); }
+  .item.texto:hover { border-color: var(--anil); }
+  .item.texto .play { background: #172636; color: var(--anil); font-size: 13px; }
+  .item.texto .nome { font-weight: 500; }
+  .textos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .celulas { display: flex; gap: 3px; }
+  .cel { width: 34px; height: 30px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; line-height: 1.15; }
+  .cel.d { background: #3A2516; color: var(--urucum); }
+  .cel.e { background: #172636; color: var(--anil); }
+  .cel.vazia { border: 1px dashed var(--sel); }
+  .cel span:last-child { opacity: .7; }
+  .celulas.miudas .cel { width: 22px; font-size: 8px; }
+
+  /* erro */
+  .erro-cartao { margin: auto; width: 620px; }
+  .erro-cartao pre { white-space: pre-wrap; background: var(--fundo-fundo); border-radius: 10px; padding: 12px; color: var(--suave); font-size: 12px; max-height: 220px; overflow: auto; user-select: text; margin: 0; }
+</style>
+</head>
+<body class="tela-config">
+<div class="app">
+  <div id="folhas"></div>
+  <div class="faixa"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="f4"></i></div>
+
+  <!-- configurar -->
+  <section class="tela ativa" id="tela-config">
+    <div class="conteudo">
+      <div class="marca">
+        <div class="logo"></div>
+        <div>
+          <div class="nome"><b>tumtá</b><span>Partitura de Atabaque e Djembe</span></div>
+          <p>Mande uma música e receba os vídeos de treino: onde bater, com qual mão, levada por levada.</p>
+        </div>
+      </div>
+
+      <div class="cartao" id="cartao-musica">
+        <div class="titulo-cartao">
+          <span class="passo" id="passo-1">1</span><b>Música</b>
+          <button class="recentes-btn" id="recentes-btn">Recentes <small>▾</small></button>
+          <div class="seg" id="abas">
+            <button data-aba="yt" class="sel"><span class="yt"></span>Link do YouTube</button>
+            <button data-aba="arquivo">♪ Arquivo</button>
+          </div>
+        </div>
+        <div class="recentes" id="recentes" hidden></div>
+        <div id="area"></div>
+      </div>
+
+      <div class="grade">
+        <div class="cartao">
+          <div class="titulo-cartao"><span class="passo">2</span><b>Instrumento</b></div>
+          <div class="tambores">
+            <button class="tambor" data-inst="atabaque">
+              <div class="desenho" id="desenho-atabaque">
+                <div class="aro-atab"></div><div class="couro"></div>
+                <div class="mao" style="left:38px;top:58px;background:var(--anil)"></div>
+                <div class="mao" style="right:38px;top:46px;background:var(--urucum)"></div>
+              </div>
+              <div class="rot"><b>Atabaque</b><span>aro e cravelhas</span></div>
+            </button>
+            <button class="tambor" data-inst="djembe">
+              <div class="desenho">
+                <div class="corda"></div><div class="aro-dj"></div><div class="couro-dj"></div>
+                <div class="mao" style="left:36px;top:58px;background:var(--anil)"></div>
+                <div class="mao" style="right:36px;top:46px;background:var(--urucum)"></div>
+              </div>
+              <div class="rot"><b>Djembe</b><span>corda trançada</span></div>
+            </button>
+          </div>
+          <div class="legenda">
+            <span><i style="background:var(--anil)"></i>mão esquerda</span>
+            <span><i style="background:var(--urucum)"></i>mão direita</span>
+          </div>
+        </div>
+
+        <div class="cartao opcoes">
+          <div class="titulo-cartao"><span class="passo">3</span><b>Opções</b></div>
+          <div class="opcao sem-clique">
+            <div class="tx"><b>Velocidade</b><span>Mais lenta pra treinar com calma</span></div>
+            <div class="seg vel" id="vel">
+              <button data-v="0.5">0,5×</button><button data-v="0.75">0,75×</button><button data-v="1" class="sel">Normal</button>
+            </div>
+          </div>
+          <div class="opcao on" data-op="aulas">
+            <div class="tx"><b>Aulas e trechos</b><span>Uma aula passo a passo de cada levada e os cortes da música</span></div>
+            <div class="chave"></div>
+          </div>
+          <div class="opcao" data-op="clique">
+            <div class="tx"><b>Som de TUM/TA por cima</b><span>Pra conferir se as batidas estão certas</span></div>
+            <div class="chave"></div>
+          </div>
+          <div class="opcao" data-op="tres_sons">
+            <div class="tx"><b>Três sons <span class="avancado">avançado</span></b><span>Separa a borda em TOM (aberto) e TA (tapa)</span></div>
+            <div class="chave"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="rodape">
+      <div class="destino"><span>Salvar em</span><code id="pasta">…</code><button class="link" id="mudar-pasta">alterar</button></div>
+      <div class="dica" id="dica">Escolha uma música primeiro</div>
+      <button class="cta" id="gerar" disabled>Gerar vídeos<small>Enter</small></button>
+    </div>
+  </section>
+
+  <!-- gerando -->
+  <section class="tela" id="tela-progresso">
+    <div class="conteudo">
+      <div class="marca"><div class="logo"></div><div class="nome"><b>tumtá</b><span>Partitura de Atabaque e Djembe</span></div></div>
+      <div class="gerando">
+        <div class="cartao progresso">
+          <div class="topo">
+            <div class="cab">
+              <div class="avatar"><div class="pulos"><i></i><i></i><i></i><i></i></div></div>
+              <div class="tx"><b id="p-nome"></b><span id="p-sub"></span></div>
+              <div class="pct" id="p-pct">0%</div>
+            </div>
+            <div>
+              <div class="barra"><i id="p-barra"></i></div>
+              <div class="numeros"><span id="p-etapa">Etapa 1</span><span id="p-tempo">calculando…</span></div>
+            </div>
+          </div>
+          <ul class="etapas" id="etapas"></ul>
+        </div>
+        <div class="aviso">Pode deixar a janela minimizada. Os vídeos ficam prontos sozinhos.</div>
+        <button class="cancelar" id="cancelar">Cancelar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- pronto -->
+  <section class="tela" id="tela-pronto">
+    <div class="conteudo">
+      <div class="marca"><div class="logo"></div><div class="nome"><b>tumtá</b><span>Partitura de Atabaque e Djembe</span></div></div>
+      <div class="pronto">
+        <div class="cartao esq">
+          <div class="ok-grande">✓</div>
+          <h2>Pronto!</h2>
+          <p id="r-texto"></p>
+          <div class="fonte"><small id="r-fonte"></small><div><span id="r-inst"></span><span id="r-vel"></span></div></div>
+          <div class="acoes">
+            <button class="prim" id="abrir-pasta">Abrir a pasta</button>
+            <button class="sec" id="outra">Gerar outra música</button>
+          </div>
+        </div>
+        <div class="cartao dir" id="r-lista"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- erro -->
+  <section class="tela" id="tela-erro">
+    <div class="conteudo">
+      <div class="marca"><div class="logo"></div><div class="nome"><b>tumtá</b><span>Partitura de Atabaque e Djembe</span></div></div>
+      <div class="cartao erro-cartao">
+        <div class="titulo-cartao"><span class="passo" style="background:var(--erro);color:var(--texto)">!</span><b>Não deu certo desta vez</b></div>
+        <div style="color:var(--suave);font-size:14px">O programa parou antes de terminar. As últimas mensagens foram:</div>
+        <pre id="e-log"></pre>
+        <button class="botao contorno" id="voltar" style="align-self:flex-start">Voltar</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="folhas.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const VEL = { 0.5: "0,5×", 0.75: "0,75×", 1: "Normal" };
+const ETAPAS = [
+  { id: "baixar", nome: "Baixando do YouTube", peso: 4 },
+  { id: "ler", nome: "Lendo a música", peso: 1 },
+  { id: "separar", nome: "Separando o som do tambor", peso: 14 },
+  { id: "detectar", nome: "Encontrando as batidas", peso: 3 },
+  { id: "video", nome: "Montando o vídeo completo", peso: 42 },
+  { id: "aulas", nome: "Montando as aulas", peso: 32 },
+  { id: "trechos", nome: "Cortando os trechos", peso: 8 },
+];
+const estado = {
+  aba: "yt", arrastando: false, arquivo: null,
+  link: { url: "", estado: "vazio", titulo: "", pedido: 0 },
+  instrumento: "atabaque", velocidade: 1, pasta: "",
+  op: { aulas: true, clique: false, tres_sons: false },
+};
+let andamento = {}, atual = null, inicio = 0, relogio = null, emCurso = null, falhaLink = null;
+
+const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const linkValido = (t) => /^https?:\/\/\S+\.\S+/i.test((t || "").trim());
+const curto = (u) => u.replace(/^https?:\/\/(www\.)?/i, "").slice(0, 34) + (u.length > 44 ? "…" : "");
+
+function tela(id) {
+  document.querySelectorAll(".tela").forEach((t) => t.classList.toggle("ativa", t.id === "tela-" + id));
+  document.body.className = "tela-" + id;
+}
+
+// cravelhas do atabaque
+(() => {
+  const d = $("#desenho-atabaque");
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement("div");
+    p.className = "peg";
+    p.style.transform = `rotate(${i * 36}deg) translateY(-58px)`;
+    d.prepend(p);
+  }
+})();
+
+// ondinha decorativa do arquivo escolhido (mesma do design)
+function onda() {
+  let h = "";
+  for (let i = 0; i < 80; i++) {
+    const alt = 4 + Math.round(Math.abs(Math.sin(i * 0.61) * Math.cos(i * 0.17)) * 22);
+    const cor = i % 8 === 0 ? "var(--urucum)" : i % 8 === 4 ? "var(--anil)" : "#5A4433";
+    h += `<i style="height:${alt}px;background:${cor}"></i>`;
+  }
+  return `<div class="onda">${h}</div>`;
+}
+
+const YT_G = '<span class="yt g"></span>';
+
+function desenharArea() {
+  const a = $("#area"), L = estado.link;
+  let h;
+  if (estado.arrastando) {
+    h = `<div class="area solte"><div class="ic">↓</div><div class="tx"><b>Solte para usar este arquivo</b><span>mp3, wav, m4a ou vídeo</span></div></div>`;
+  } else if (estado.aba === "arquivo" && !estado.arquivo) {
+    h = `<div class="area clicavel" id="escolher"><div class="ic">♪</div><div class="tx"><b>Arraste a música aqui</b><span>ou clique para escolher · mp3, wav, m4a ou vídeo</span></div><span class="botao contorno" style="font-size:14px;padding:9px 16px">Escolher arquivo</span></div>`;
+  } else if (estado.aba === "arquivo") {
+    const m = estado.arquivo;
+    h = `<div class="area escolhida"><div class="ic nota">♪</div><div class="tx"><div class="linha1"><b>${esc(m.nome)}</b><span>${m.mb ? String(m.mb).replace(".", ",") + " MB · " : ""}pronta</span></div>${onda()}</div><button class="botao leve" id="trocar">Trocar</button></div>`;
+  } else if (L.estado === "ok") {
+    h = `<div class="area escolhida"><div class="ic video">${YT_G}</div><div class="tx"><div class="linha1"><b>${esc(L.titulo || L.url)}</b><span>do YouTube · baixa ao gerar</span></div>${onda()}</div><button class="botao leve" id="trocar">Trocar</button></div>`;
+  } else if (L.estado === "buscando") {
+    h = `<div class="area firme"><div class="ic">${YT_G}</div><div class="tx"><b>Procurando o vídeo…</b><span>${esc(curto(L.url))}</span></div><button class="botao contorno" id="cancelar-busca">Cancelar</button></div>`;
+  } else if (L.estado === "invalido") {
+    h = `<div class="area ruim"><div class="ic">!</div><div class="tx"><b>Esse link não parece ser do YouTube</b><span>Confira o endereço e cole de novo.</span></div><button class="botao contorno" id="colar-outro">Colar outro</button></div>`;
+  } else if (L.estado === "indisponivel") {
+    h = `<div class="area ruim"><div class="ic">!</div><div class="tx"><b>Não deu pra baixar esse vídeo</b><span>Ele é privado, foi removido ou tem limite de idade.</span></div><button class="botao contorno" id="colar-outro">Colar outro</button></div>`;
+  } else if (L.estado === "internet") {
+    h = `<div class="area firme"><div class="ic" style="color:var(--suave);font-size:18px;font-weight:700">⌁</div><div class="tx"><b>Sem conexão com a internet</b><span>Dá pra usar um arquivo do computador enquanto isso.</span></div><button class="botao" id="usar-arquivo" style="padding:9px 14px;font-size:13px">Usar arquivo</button></div>`;
+  } else {
+    h = `<div class="area"><div class="ic">${YT_G}</div><div class="entrada-link"><input id="link" type="text" spellcheck="false" placeholder="Cole aqui o link · youtube.com/watch?v=…" value="${esc(L.url)}"><small>O áudio é baixado direto, não precisa salvar nada antes. <span class="tecla">Ctrl+V</span> cola o link</small></div><button class="botao colar" id="colar">Colar link</button></div>`;
+  }
+  a.innerHTML = h;
+  const on = (id, f) => { const el = document.getElementById(id); if (el) el.onclick = f; };
+  on("escolher", escolherArquivo);
+  on("trocar", () => {
+    if (estado.aba === "arquivo") estado.arquivo = null;
+    else estado.link = { ...estado.link, url: "", estado: "vazio", titulo: "" };
+    atualizar();
+    if (estado.aba === "yt") $("#link").focus();
+  });
+  on("cancelar-busca", () => { estado.link.pedido++; estado.link.estado = "vazio"; atualizar(); });
+  on("colar-outro", colarLink);
+  on("colar", colarLink);
+  on("usar-arquivo", () => trocarAba("arquivo"));
+  const input = $("#link");
+  if (input) {
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); usarLink(input.value); } });
+    input.addEventListener("paste", (e) => { e.preventDefault(); usarLink((e.clipboardData || window.clipboardData).getData("text")); });
+    input.addEventListener("input", () => { estado.link.url = input.value; });
+  }
+}
+
+function pronta() {
+  return estado.aba === "yt" ? estado.link.estado === "ok" : !!estado.arquivo;
+}
+
+function atualizar() {
+  document.querySelectorAll("#abas button").forEach((b) => b.classList.toggle("sel", b.dataset.aba === estado.aba));
+  desenharArea();
+  const ok = pronta();
+  const p1 = $("#passo-1");
+  p1.textContent = ok ? "✓" : "1";
+  p1.classList.toggle("ok", ok);
+  $("#gerar").disabled = !ok;
+  $("#dica").textContent = ok ? "" : estado.link.estado === "buscando" ? "Procurando o vídeo…" : "Escolha uma música primeiro";
+}
+
+function trocarAba(aba) {
+  estado.aba = aba;
+  atualizar();
+  if (aba === "yt" && $("#link")) $("#link").focus();
+}
+
+function usarLink(texto) {
+  const url = (texto || "").trim();
+  estado.aba = "yt";
+  if (!url) { atualizar(); if ($("#link")) $("#link").focus(); return; }
+  const L = estado.link;
+  L.url = url; L.titulo = ""; L.pedido++;
+  if (!linkValido(url)) { L.estado = "invalido"; atualizar(); return; }
+  L.estado = "buscando";
+  atualizar();
+  pywebview.api.verificar_link(url, L.pedido);
+}
+
+async function colarLink() {
+  usarLink(await pywebview.api.colar());
+}
+
+async function escolherArquivo() {
+  const m = await pywebview.api.escolher_musica();
+  if (m) { estado.aba = "arquivo"; estado.arquivo = m; atualizar(); }
+}
+
+function escolherInstrumento(nome) {
+  estado.instrumento = nome;
+  document.querySelectorAll(".tambor").forEach((el) => el.classList.toggle("sel", el.dataset.inst === nome));
+}
+
+// recentes
+async function abrirRecentes() {
+  const caixa = $("#recentes");
+  if (!caixa.hidden) { caixa.hidden = true; return; }
+  const itens = await pywebview.api.recentes();
+  caixa.innerHTML = `<h4>GERADAS ANTES</h4>` + (itens.length ? "" : `<div class="vazio">As músicas que você gerar aparecem aqui.</div>`);
+  for (const r of itens) {
+    const b = document.createElement("button");
+    const yt = r.tipo === "youtube";
+    b.className = "rec";
+    b.innerHTML = `<div class="ic ${yt ? "yt-ic" : "arq-ic"}">${yt ? "▶" : "♪"}</div><div class="tx"><b>${esc(r.nome)}</b><span>${esc(r.meta)}</span></div>`;
+    b.onclick = () => {
+      caixa.hidden = true;
+      if (yt) { estado.aba = "yt"; estado.link = { ...estado.link, url: r.fonte, titulo: r.nome, estado: "ok" }; }
+      else { estado.aba = "arquivo"; estado.arquivo = { caminho: r.fonte, nome: r.nome, mb: 0 }; }
+      if (r.instrumento) escolherInstrumento(r.instrumento);
+      atualizar();
+    };
+    caixa.appendChild(b);
+  }
+  caixa.hidden = false;
+}
+
+// progresso
+function fmtTempo(s) {
+  s = Math.max(0, Math.round(s));
+  if (s < 60) return `${s} s`;
+  const m = Math.floor(s / 60), r = s % 60;
+  return m < 60 ? `${m} min ${r} s` : `${Math.floor(m / 60)} h ${m % 60} min`;
+}
+
+function etapasVisiveis() {
+  return ETAPAS.filter((e) => (emCurso.op.aulas || (e.id !== "aulas" && e.id !== "trechos"))
+    && (emCurso.porLink || e.id !== "baixar"));
+}
+
+function desenharProgresso() {
+  const ul = $("#etapas");
+  const vis = etapasVisiveis();
+  let feito = 0, total = 0, chegou = false, n = 1;
+  ul.innerHTML = "";
+  vis.forEach((e, i) => {
+    total += e.peso;
+    const a = andamento[e.id] || {};
+    const li = document.createElement("li");
+    let det = "";
+    if (e.id === atual) {
+      li.className = "ativa"; chegou = true; n = i + 1;
+      const pct = e.id === "aulas" && a.n ? 100 * ((a.k - 1) + (a.pct || 0) / 100) / a.n : (a.pct || 0);
+      feito += e.peso * pct / 100;
+      if (e.id === "aulas" && a.n) det = `levada ${a.k} de ${a.n}` + (a.pct ? ` · ${Math.floor(a.pct)}%` : "");
+      else if (a.pct != null && !["ler", "detectar", "trechos"].includes(e.id)) det = `${Math.floor(a.pct)}%`;
+    } else if (!chegou && atual) {
+      li.className = "feita"; feito += e.peso;
+      if (e.id === "baixar" && a.mb) det = `${String(a.mb).replace(".", ",")} MB`;
+    }
+    li.innerHTML = `<span class="bola"></span><span class="nome">${e.nome}</span><span class="det">${det}</span>`;
+    ul.appendChild(li);
+  });
+  const pct = total ? Math.min(99, 100 * feito / total) : 0;
+  $("#p-barra").style.width = pct + "%";
+  $("#p-pct").textContent = Math.floor(pct) + "%";
+  $("#p-etapa").textContent = `Etapa ${n} de ${vis.length}`;
+  const passou = (Date.now() - inicio) / 1000;
+  $("#p-tempo").textContent = pct > 4 ? `faltam cerca de ${fmtTempo(passou * (100 - pct) / pct)}` : `${fmtTempo(passou)} · calculando…`;
+}
+
+async function gerar() {
+  if (!pronta() || emCurso) return;
+  const porLink = estado.aba === "yt";
+  const nome = porLink ? (estado.link.titulo || estado.link.url) : estado.arquivo.nome;
+  emCurso = { porLink, nome, op: { ...estado.op }, instrumento: estado.instrumento, velocidade: estado.velocidade };
+  andamento = {}; atual = null; inicio = Date.now(); falhaLink = null;
+  $("#p-nome").textContent = porLink ? nome : nome.replace(/\.[^.]+$/, "");
+  const inst = estado.instrumento === "atabaque" ? "Atabaque" : "Djembe";
+  const vel = estado.velocidade === 1 ? "velocidade normal" : `velocidade ${VEL[estado.velocidade]}`;
+  $("#p-sub").textContent = `${porLink ? "do YouTube" : "arquivo do computador"} · ${inst} · ${vel} · ${estado.op.aulas ? "com aulas e trechos" : "só o vídeo completo"}`;
+  desenharProgresso();
+  tela("progresso");
+  clearInterval(relogio);
+  relogio = setInterval(desenharProgresso, 1000);
+  await pywebview.api.gerar({
+    musica: porLink ? estado.link.url : estado.arquivo.caminho, nome, por_link: porLink,
+    instrumento: estado.instrumento, velocidade: estado.velocidade, pasta_saida: estado.pasta,
+    aulas: estado.op.aulas, clique: estado.op.clique, tres_sons: estado.op.tres_sons,
+  });
+}
+
+function terminar() {
+  clearInterval(relogio);
+  emCurso = null;
+}
+
+// pronto
+function celulasHtml(cels) {
+  if (!cels || !cels.length) return "";
+  const h = cels.map((c) => c.tipo
+    ? `<div class="cel ${c.mao === "E" ? "e" : "d"}"><span>${c.tipo}</span><span>${c.mao}</span></div>`
+    : `<div class="cel vazia"></div>`).join("");
+  return `<div class="celulas${cels.length > 8 ? " miudas" : ""}">${h}</div>`;
+}
+
+function mostrarResultado(ev) {
+  const fim = emCurso || {};
+  estado.pastaResultado = ev.pasta;
+  const nA = ev.aulas.length, nT = ev.trechos.length;
+  let txt = `Tudo gerado em ${fmtTempo(ev.segundos)}.`;
+  if (nA) txt += ` ${nA} ${nA > 1 ? "levadas" : "levada"} com aula passo a passo`;
+  if (nT) txt += ` e ${nT} ${nT > 1 ? "trechos" : "trecho"}`;
+  if (nA) txt += ".";
+  $("#r-texto").textContent = txt + " Clique num vídeo pra assistir.";
+  $("#r-fonte").textContent = fim.nome || "";
+  $("#r-inst").textContent = fim.instrumento === "atabaque" ? "Atabaque" : "Djembe";
+  $("#r-vel").textContent = VEL[fim.velocidade] || "Normal";
+
+  const lista = $("#r-lista");
+  let h = "";
+  if (ev.completo) {
+    h += `<button class="destaque" data-abrir="${esc(ev.completo)}"><div class="miniatura"><div class="tam"></div><div class="play">▶</div></div><div class="tx"><span class="rotulo">Música inteira</span><b>Vídeo completo</b><span>A música toda com onde bater e qual mão</span></div></button>`;
+  }
+  if (nA) {
+    h += `<div class="grupo"><div class="rotulo">Aulas passo a passo</div>` + ev.aulas.map((a) =>
+      `<button class="item" data-abrir="${esc(a.caminho)}"><span class="play">▶</span><span class="nome">${esc(a.nome)}</span>${celulasHtml(a.celulas)}</button>`).join("") + `</div>`;
+  }
+  if (nT) {
+    h += `<div class="grupo"><div class="rotulo">Trechos da música</div>` + ev.trechos.map((t) =>
+      `<button class="item" data-abrir="${esc(t.caminho)}"><span class="play">▶</span><span class="nome">${esc(t.nome)}</span><span class="det">${esc(t.detalhe)}</span></button>`).join("") + `</div>`;
+  }
+  if (ev.textos.length) {
+    h += `<div class="grupo"><div class="rotulo">Partitura em texto</div><div class="textos">` + ev.textos.map((t) =>
+      `<button class="item texto" data-abrir="${esc(t.caminho)}"><span class="play">≡</span><span class="nome">${esc(t.nome)}</span></button>`).join("") + `</div></div>`;
+  }
+  lista.innerHTML = h;
+  lista.querySelectorAll("[data-abrir]").forEach((b) => b.onclick = () => pywebview.api.abrir(b.dataset.abrir));
+  terminar();
+  tela("pronto");
+}
+
+// eventos vindos do Python
+window.evento = (ev) => {
+  if (ev.tipo === "musica") {
+    estado.arrastando = false; estado.aba = "arquivo"; estado.arquivo = ev; atualizar(); return;
+  }
+  if (ev.tipo === "link") {
+    const L = estado.link;
+    if (ev.pedido !== L.pedido) return;  // busca cancelada ou trocada
+    L.estado = ev.estado;
+    if (ev.estado === "ok") L.titulo = ev.titulo;
+    atualizar(); return;
+  }
+  if (ev.tipo === "etapa") {
+    atual = ev.etapa;
+    const a = (andamento[ev.etapa] = andamento[ev.etapa] || {});
+    if (ev.etapa === "aulas") { a.k = ev.k; a.n = ev.n; a.pct = 0; }
+    if (ev.pct != null) a.pct = ev.pct;
+  } else if (ev.tipo === "pct") {
+    const a = (andamento[ev.etapa] = andamento[ev.etapa] || {});
+    a.pct = ev.pct;
+    if (ev.mb) a.mb = ev.mb;
+  } else if (ev.tipo === "titulo") {
+    $("#p-nome").textContent = ev.titulo;
+    if (emCurso) emCurso.nome = ev.titulo;
+  } else if (ev.tipo === "info") {
+    const m = ev.texto.match(/(\d+) batidas.*~(\d+) BPM/);
+    if (m && emCurso) $("#p-sub").textContent = `${emCurso.porLink ? "do YouTube" : "arquivo do computador"} · ${m[1]} batidas · ~${m[2]} BPM`;
+  } else if (ev.tipo === "falha_link") {
+    falhaLink = ev.estado;
+  } else if (ev.tipo === "fim") {
+    mostrarResultado(ev); return;
+  } else if (ev.tipo === "erro") {
+    terminar();
+    if (falhaLink) {  // o download falhou: volta pro cartao da musica mostrando o motivo
+      estado.link.estado = falhaLink; atualizar(); tela("config"); return;
+    }
+    $("#e-log").textContent = ev.log || "(sem mensagens)";
+    tela("erro"); return;
+  } else if (ev.tipo === "cancelado") {
+    terminar(); tela("config"); return;
+  }
+  desenharProgresso();
+};
+
+// cliques da pagina
+document.querySelectorAll("#abas button").forEach((b) => b.onclick = () => trocarAba(b.dataset.aba));
+document.querySelectorAll(".tambor").forEach((el) => el.onclick = () => escolherInstrumento(el.dataset.inst));
+document.querySelectorAll("#vel button").forEach((b) => b.onclick = () => {
+  document.querySelectorAll("#vel button").forEach((x) => x.classList.toggle("sel", x === b));
+  estado.velocidade = parseFloat(b.dataset.v);
+});
+document.querySelectorAll(".opcao[data-op]").forEach((el) => el.onclick = () => {
+  const k = el.dataset.op;
+  estado.op[k] = !estado.op[k];
+  el.classList.toggle("on", estado.op[k]);
+});
+$("#recentes-btn").onclick = (e) => { e.stopPropagation(); abrirRecentes(); };
+document.addEventListener("click", (e) => { if (!e.target.closest("#recentes")) $("#recentes").hidden = true; });
+$("#mudar-pasta").onclick = async () => {
+  const p = await pywebview.api.escolher_pasta();
+  if (p) { estado.pasta = p; $("#pasta").textContent = p; }
+};
+$("#gerar").onclick = gerar;
+$("#cancelar").onclick = () => pywebview.api.cancelar();
+$("#abrir-pasta").onclick = () => pywebview.api.abrir(estado.pastaResultado);
+$("#outra").onclick = () => tela("config");
+$("#voltar").onclick = () => tela("config");
+
+// Enter gera; Ctrl+V fora do campo cola o link
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && $("#tela-config").classList.contains("ativa") && !$("#gerar").disabled) gerar();
+});
+document.addEventListener("paste", (e) => {
+  if (!$("#tela-config").classList.contains("ativa") || e.target.id === "link") return;
+  const t = (e.clipboardData || window.clipboardData).getData("text");
+  if (t && t.trim()) { e.preventDefault(); usarLink(t); }
+});
+
+// arrastar arquivo por cima da janela
+let profundidade = 0;
+document.addEventListener("dragenter", (e) => {
+  e.preventDefault();
+  if (++profundidade === 1 && $("#tela-config").classList.contains("ativa")) { estado.arrastando = true; desenharArea(); }
+});
+document.addEventListener("dragover", (e) => e.preventDefault());
+document.addEventListener("dragleave", () => {
+  if (--profundidade <= 0) { profundidade = 0; estado.arrastando = false; desenharArea(); }
+});
+document.addEventListener("drop", (e) => {
+  e.preventDefault(); profundidade = 0; estado.arrastando = false; desenharArea();
+});
+
+window.addEventListener("pywebviewready", async () => {
+  const cfg = await pywebview.api.inicio();
+  estado.pasta = cfg.pasta_saida;
+  $("#pasta").textContent = cfg.pasta_saida;
+  escolherInstrumento(cfg.instrumento);
+});
+escolherInstrumento("atabaque");
+atualizar();
+</script>
+</body>
+</html>

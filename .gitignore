@@ -1,0 +1,13 @@
+# ambientes e caches
+.venv/
+.venv-build/
+__pycache__/
+*.pyc
+
+# gerados
+build/
+dist/
+saida/
+
+# modelo do Demucs (84 MB): o empacotar.py baixa sozinho
+modelo/*.safetensors
