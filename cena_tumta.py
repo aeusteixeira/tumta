@@ -407,7 +407,7 @@ class CenaTumta:
                                      brilho_raio=12, brilho_a=0.25)
         self.agora = (Sprite(agora), m)
         self.batidas = [Sprite(self._linha_batidas(k)) for k in range(4)]
-        self.contagens = {}
+        self.cartao = None
 
     def _linha_batidas(self, ativa):
         f, fe = fonte(17, "ExtraBold"), fonte(13)
@@ -637,74 +637,50 @@ class CenaTumta:
 
     # --- contagem (antes de cada levada)
 
-    def _tela_contagem(self, etapa, tempo):
-        chave = (etapa["numero"] if etapa else 0, tempo)
-        if chave in self.contagens:
-            return self.contagens[chave].copy()
-        img = np.zeros((H, W, 3), np.uint8)
-        img[:] = hexa(FUNDO)
-        nomes = []
-        if self.levada:
-            nomes.append((f"Levada {self.levada}", "#F08A2C"))
-        nomes.append(("Atabaque" if self.instrumento == "atabaque" else "Djembe", "#D8CABA"))
-        bpm = etapa["bpm"] if etapa else self.bpm
-        vel = f"{self.velocidade:g}×".replace(".", ",") + " · " if self.velocidade != 1 else ""
-        nomes.append((f"{vel}~{bpm:.0f} BPM", "#D8CABA"))
-        chips = [Sprite(pilula(n, "#2E2118", c, 14, "Bold", 12, 4)) for n, c in nomes]
-        total_w = sum(c.w for c in chips) + 8 * (len(chips) - 1)
-        x = (W - total_w) / 2
-        y0 = 150 if etapa else 175
-        for c in chips:
-            c.colar(img, x, y0)
-            x += c.w + 8
-        titulo, tam = caber(titulo_curto(self.titulo), W - 120, 40, 26, serif=True)
-        texto(img, titulo, W / 2, y0 + 70, tam, CLARO, serif=True, ancora="mm")
-        y = y0 + 120
+    def _cartao_contagem(self, img, etapa, tempo):
+        """Cartao pequeno em cima do tambor. A cena continua por tras, entao a pista ja mostra
+        as primeiras notas chegando durante o compasso de contagem."""
+        w, h = 520, 270
+        x0, y0 = CENTRO[0] - w // 2, CENTRO[1] - h // 2
+        if self.cartao is None:
+            box, m = caixa_arredondada(w, h, 18, fundo=FUNDO, borda="#3A2B1F", esp=2)
+            a = np.asarray(box, np.float32)
+            a[..., 3] *= 0.88
+            self.cartao = (Sprite(Image.fromarray(a.astype(np.uint8), "RGBA")), m)
+        spr, m = self.cartao
+        spr.colar(img, x0 - m, y0 - m)
+        cx = CENTRO[0]
         if etapa:
-            texto(img, f"Passo {etapa['numero']} de {etapa['de']} · {etapa['titulo']}", W / 2, y, 22,
-                  "#F08A2C", "Bold", ancora="mm")
-            y += 30
+            s, tam = caber(f"Passo {etapa['numero']} de {etapa['de']} · {etapa['titulo']}", w - 40, 21, 15,
+                           peso="Bold")
+            texto(img, s, cx, y0 + 40, tam, "#F08A2C", "Bold", ancora="mm")
+        else:
+            s, tam = caber(titulo_curto(self.titulo), w - 40, 26, 16, serif=True)
+            texto(img, s, cx, y0 + 40, tam, CLARO, serif=True, ancora="mm")
         # os 4 tempos
-        cy = y + 95
-        tamanhos = [150 if k == tempo else 110 for k in range(4)]
-        larg = sum(tamanhos) + 24 * 3
-        x = (W - larg) / 2
+        cy = y0 + 140
+        tamanhos = [104 if k == tempo else 74 for k in range(4)]
+        larg = sum(tamanhos) + 18 * 3
+        x = cx - larg / 2
         for k, tam in enumerate(tamanhos):
-            cx = x + tam / 2
+            c = x + tam / 2
             if k == tempo:
-                cv2.circle(img, (int(cx), int(cy)), tam // 2 + 14, (40, 43, 46), -1, cv2.LINE_AA)
-                cv2.circle(img, (int(cx), int(cy)), tam // 2, hexa(CLARO), -1, cv2.LINE_AA)
-                texto(img, str(k + 1), cx, cy, 72, "#17110D", "ExtraBold", ancora="mm")
+                cv2.circle(img, (int(c), int(cy)), tam // 2 + 10, (40, 43, 46), -1, cv2.LINE_AA)
+                cv2.circle(img, (int(c), int(cy)), tam // 2, hexa(CLARO), -1, cv2.LINE_AA)
+                texto(img, str(k + 1), c, cy, 52, "#17110D", "ExtraBold", ancora="mm")
             elif k < tempo:
-                cv2.circle(img, (int(cx), int(cy)), tam // 2, hexa("#3A2B1F"), -1, cv2.LINE_AA)
-                texto(img, str(k + 1), cx, cy, 44, "#7D6B5B", "ExtraBold", ancora="mm")
+                cv2.circle(img, (int(c), int(cy)), tam // 2, hexa("#3A2B1F"), -1, cv2.LINE_AA)
+                texto(img, str(k + 1), c, cy, 32, "#7D6B5B", "ExtraBold", ancora="mm")
             else:
-                cv2.circle(img, (int(cx), int(cy)), tam // 2 - 2, hexa("#3A2B1F"), 3, cv2.LINE_AA)
-                texto(img, str(k + 1), cx, cy, 44, "#4A3828", "ExtraBold", ancora="mm")
-            x += tam + 24
-        texto(img, "Prepare as mãos · começa no próximo 1", W / 2, cy + 120, 20, "#BFAE9C", ancora="mm")
-        # legenda
-        itens = [(TUM, "centro"), (TA, "borda")] if not self.tres_sons else [(TUM, "centro"), (ABERTO, "aberto"), (TA, "tapa")]
-        partes = []
-        for tipo, desc in itens:
-            p = Sprite(pilula(NOMES[tipo], COR_SOM[tipo], TEXTO_SOM[tipo], 15, "ExtraBold", 12, 5))
-            partes.append((p, desc, largura(desc, 15)))
-        larg = sum(p.w + 8 + w for p, _, w in partes) + 24 * (len(partes) - 1)
-        x = (W - larg) / 2
-        yl = cy + 165
-        for p, desc, w in partes:
-            p.colar(img, x, yl - p.h / 2)
-            texto(img, desc, x + p.w + 8, yl, 15, "#A89684", ancora="lm")
-            x += p.w + 8 + w + 24
-        self.contagens[chave] = img
-        return img.copy()
+                cv2.circle(img, (int(c), int(cy)), tam // 2 - 2, hexa("#3A2B1F"), 3, cv2.LINE_AA)
+                texto(img, str(k + 1), c, cy, 32, "#4A3828", "ExtraBold", ancora="mm")
+            x += tam + 18
+        texto(img, "Prepare as mãos · olhe a pista · começa no próximo 1", cx, y0 + 232, 16, "#BFAE9C",
+              ancora="mm")
 
     # --- quadro
 
     def frame(self, t):
-        cont = self._contagem(t)
-        if cont is not None:
-            return self._tela_contagem(*cont)
         img = self.base.copy()
         poses = {m: self._pose(m, t) for m in (D, E)}
         for mao in sorted((D, E), key=lambda m: poses[m][2]):  # a mais levantada por cima
@@ -714,4 +690,7 @@ class CenaTumta:
         for spr, cx, top in self.pilulas:
             spr.colar(img, cx - spr.w / 2, top)
         self._painel(img, t)
+        cont = self._contagem(t)
+        if cont is not None:
+            self._cartao_contagem(img, *cont)
         return img
